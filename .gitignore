@@ -1,0 +1,8 @@
+figs/
+gpuprofile/
+**/__pycache__/
+*.pyc
+*.pyo
+phase0_wkv/
+
+md/
