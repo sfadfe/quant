@@ -1,8 +1,13 @@
-figs/
-gpuprofile/
+/figs/
+/gpuprofile/
 **/__pycache__/
 *.pyc
 *.pyo
-phase0_wkv/
+adaptive_weight/results/*
+!adaptive_weight/results/layer_rank.json
+
+.cursor/
+AGENTS.md
+docs/figs/
 
 md/
