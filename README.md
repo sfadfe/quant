@@ -1,5 +1,7 @@
 # Adaptive-Weight
 
+[English](README.md) | [한국어](README.ko.md)
+
 Progressive weight precision for long-context LLM serving: keep **int8** while VRAM allows, then demote layers to **int4** under a soft memory hold — without a cold W4 reload.
 
 Short prompts stay closer to W8 quality. As context grows, occupancy pressure demotes layers in rank order until the model matches fixed AWQ int4 once demotion is exhausted.
