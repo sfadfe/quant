@@ -18,16 +18,16 @@
 
 예측 occupancy가 소프트 타깃을 넘으면 강등이 발동합니다:
 
-$$
-\mathrm{projected} = \frac{\mathrm{alloc\_mib} + L \cdot \mathrm{kv\_mib\_per\_tok}}{1024},\qquad
-\mathrm{target} = \mathrm{W8\_alloc} + \mathrm{hold\_headroom\_gib}
-$$
+```math
+\mathrm{projected} = \frac{\mathrm{alloc\textunderscore{}mib} + L \cdot \mathrm{kv\textunderscore{}mib\textunderscore{}per\textunderscore{}tok}}{1024},\qquad
+\mathrm{target} = \mathrm{W8\textunderscore{}alloc} + \mathrm{hold\textunderscore{}headroom\textunderscore{}gib}
+```
 
 $\mathrm{projected} > \mathrm{target}$이면 컨트롤러가 $K$개 레이어를 강등합니다. 여기서
 
-$$
-K = \mathrm{clamp}\!\left(\left\lceil\frac{(\mathrm{projected}-\mathrm{target})\cdot 1024}{\mathrm{save\_mean\_mib}}\right\rceil,\; K_{\min},\; K_{\max}\right)
-$$
+```math
+K = \mathrm{clamp}\left(\left\lceil\frac{(\mathrm{projected}-\mathrm{target})\cdot 1024}{\mathrm{save\textunderscore{}mean\textunderscore{}mib}}\right\rceil,\; K_{\min},\; K_{\max}\right)
+```
 
 레이어 순서와 레이어별 W8→W4 절감량은 오프라인 순위(`layer_rank.json`)에서 옵니다. 아래 수치에서는 KV 양자화를 끕니다.
 
@@ -39,7 +39,7 @@ $$
 
 | 노브 | 역할 | 설정 방법 |
 | --- | --- | --- |
-| `kv_mib_per_tok` | 예측식에서 컨텍스트 토큰당 KV(+activation slack) MiB | 짧은 고정 W4 또는 Adaptive 세션에서 피팅: $\Delta\mathrm{alloc\_mib}/\Delta L$. 여기 기본값 ≈ **0.23** (Qwen3-8B, bs=1). |
+| `kv_mib_per_tok` | 예측식에서 컨텍스트 토큰당 KV(+activation slack) MiB | 짧은 고정 W4 또는 Adaptive 세션에서 피팅: $\Delta$`alloc_mib`$/\Delta L$. 여기 기본값 ≈ **0.23** (Qwen3-8B, bs=1). |
 | `hold_headroom_gib` | 콜드 W8 alloc 위의 소프트 천장 | **0.35–0.75** 근처에서 시작. 이 런에서는 **0.50**이 ≈ W8+0.5 GiB를 유지. 너무 타이트하면 조기 강등, 너무 느슨하면 발동 전 OOM. |
 | `occ_k_min` / `occ_k_max` | 발동당 강등 레이어 수 | 작은 스텝 (예: **2–6**)은 홀드를 부드럽게 하고, 큰 $K$는 VRAM을 더 빨리 비우지만 stall이 커집니다. |
 | `save_mean_mib` / `save_per_layer_mib` | $K$의 분모 | `build_awq_layer_rank.py`에서 (W8 vs W4 shard nbytes). 새 W8/W4 체크포인트 이후 다시 빌드. |
