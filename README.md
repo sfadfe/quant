@@ -19,14 +19,14 @@ Short prompts stay closer to W8 quality. As context grows, occupancy pressure de
 Demotion fires when projected occupancy exceeds a soft target:
 
 $$
-\text{projected} = \frac{\texttt{alloc\_mib} + L \cdot \texttt{kv\_mib\_per\_tok}}{1024},\qquad
-\text{target} = \texttt{W8\_alloc} + \texttt{hold\_headroom\_gib}
+\mathrm{projected} = \frac{\mathrm{alloc\_mib} + L \cdot \mathrm{kv\_mib\_per\_tok}}{1024},\qquad
+\mathrm{target} = \mathrm{W8\_alloc} + \mathrm{hold\_headroom\_gib}
 $$
 
-When $\text{projected} > \text{target}$, the controller demotes $K$ layers where
+When $\mathrm{projected} > \mathrm{target}$, the controller demotes $K$ layers where
 
 $$
-K = \mathrm{clamp}\!\left(\left\lceil\frac{(\text{projected}-\text{target})\cdot 1024}{\texttt{save\_mean\_mib}}\right\rceil,\; K_{\min},\; K_{\max}\right)
+K = \mathrm{clamp}\!\left(\left\lceil\frac{(\mathrm{projected}-\mathrm{target})\cdot 1024}{\mathrm{save\_mean\_mib}}\right\rceil,\; K_{\min},\; K_{\max}\right)
 $$
 
 Layer order and per-layer W8→W4 savings come from an offline rank (`layer_rank.json`). KV quantization is off in the numbers below.
@@ -39,7 +39,7 @@ These are **not** universal. Re-measure when changing model size, KV layout, bat
 
 | Knob | Role | How to set |
 | --- | --- | --- |
-| `kv_mib_per_tok` | MiB of KV (+activation slack) per context token in the projection | Fit from a short fixed-W4 or Adaptive session: $\Delta\texttt{alloc\_mib}/\Delta L$. Default here ≈ **0.23** for Qwen3-8B, bs=1. |
+| `kv_mib_per_tok` | MiB of KV (+activation slack) per context token in the projection | Fit from a short fixed-W4 or Adaptive session: $\Delta\mathrm{alloc\_mib}/\Delta L$. Default here ≈ **0.23** for Qwen3-8B, bs=1. |
 | `hold_headroom_gib` | Soft ceiling above cold W8 alloc | Start near **0.35–0.75**; **0.50** holds ≈ W8+0.5 GiB in this run. Too tight → early demote; too loose → OOM before fire. |
 | `occ_k_min` / `occ_k_max` | Layers demoted per fire | Small steps (e.g. **2–6**) smooth the hold; larger $K$ dumps VRAM faster with bigger stalls. |
 | `save_mean_mib` / `save_per_layer_mib` | Denominator for $K$ | From `build_awq_layer_rank.py` (W8 vs W4 shard nbytes). Rebuild after any new W8/W4 checkpoint. |
